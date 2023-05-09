@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CameraController cameraReference;
     [SerializeField] private AudioSource newAudio;
     [SerializeField] private AudioClip Fire;
+    [SerializeField] private Camera Camera;
+    private Vector3 movementDirection;
 
     private void Start() {
         GetComponent<HealthBarController>().onHit += cameraReference.CallScreenShake;
@@ -22,8 +24,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Update() {
-        Vector2 movementPlayer = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        myRBD2.velocity = movementPlayer * velocityModifier;
+        MoveThePlayer();
 
         animatorController.SetVelocity(velocityCharacter: myRBD2.velocity.magnitude);
 
@@ -45,5 +46,28 @@ public class PlayerController : MonoBehaviour
 
     private void CheckFlip(float x_Position){
         spriteRenderer.flipX = (x_Position - transform.position.x) < 0;
+    }
+    public void UpdateMovement(Vector2 start)
+    {
+        myRBD2.velocity = start * velocityModifier;
+    }
+    void MoveThePlayer()
+    {
+        Vector3 movement = CameraDirection(movementDirection) * velocityModifier * Time.deltaTime;
+        myRBD2.MovePosition(transform.position + movement);
+    }
+    Vector3 CameraDirection(Vector3 movementDirection)
+    {
+        var cameraForward = Camera.transform.forward;
+        var cameraRight = Camera.transform.right;
+
+        cameraForward.z = 0f;
+        cameraRight.z = 0f;
+
+        return cameraForward * movementDirection.y + cameraRight * movementDirection.x;
+    }
+    public void UpdateMovementData(Vector3 newMovementDirection)
+    {
+        movementDirection = newMovementDirection;
     }
 }
